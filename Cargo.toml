@@ -2,6 +2,12 @@
 name = "python-vaporetto"
 version = "0.1.0"
 edition = "2021"
+authors = ["Koichi Akabe <vbkaisetsu@gmail.com>"]
+description = "Python wrapper of Vaporetto tokenizer"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/legalforce-research/python-vaporetto"
+repository = "https://github.com/legalforce-research/python-vaporetto"
 
 [lib]
 name = "vaporetto"

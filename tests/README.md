@@ -1,6 +1,6 @@
 # Test and Benchmarking
 
-To run the benchmarking script, download the model file, decompress, and put into the specified directory:
+The benchmarking script requires a KyTea's model. Run the following commands to download a model, decompress, and put into the specified directory:
 ```
 $ wget http://www.phontron.com/kytea/download/model/jp-0.4.7-6.mod.gz
 $ gunzip jp-0.4.7-6.mod.gz
