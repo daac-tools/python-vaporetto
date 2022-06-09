@@ -17,10 +17,13 @@ Or you can also build from the source:
 $ python -m venv .env
 $ source .env/bin/activate
 $ pip install maturin
-$ maturin build
+$ maturin develop -r
 ```
 
 ## Example Usage
+
+python-vaporetto does not contain model files.
+To perform tokenization, follow [the document of Vaporetto](https://github.com/daac-tools/vaporetto) to download distribution models or train your own models before hand.
 
 ```python
 # Import vaporetto module
