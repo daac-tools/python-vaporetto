@@ -50,6 +50,17 @@ tokens[0].tag(1)
 #=> ['まぁ', '社長', 'は', '火星', '猫', 'だ']]
 ```
 
+You can also use KyTea's models as follows:
+
+```python
+with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:
+    model = fp.read()
+
+tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
+```
+
+Note: Vaporetto does not support tag prediction with KyTea's models.
+
 ## Documentation
 
 Use the help function to show the API reference.

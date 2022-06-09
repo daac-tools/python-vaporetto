@@ -301,6 +301,7 @@ impl Vaporetto {
     /// :type out: vaporetto.Vaporetto
     #[staticmethod]
     #[args(predict_tags = "false", wsconst = "\"\"", norm = "true")]
+    #[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
     fn create_from_kytea_model(
         py: Python,
         model: &[u8],
