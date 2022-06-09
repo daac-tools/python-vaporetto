@@ -8,11 +8,12 @@ def test(session):
     session.install("-rrequirements-dev.txt")
     session.install("maturin")
     session.run_always("maturin", "develop", "-r")
-    session.run("pytest")
+    session.run("pytest", "--benchmark-skip")
 
 
 @nox.session
 def bench(session):
     session.install("-rrequirements-dev.txt")
-    session.install(".")
-    session.run("pytest", "--benchmark-enable")
+    session.install("maturin")
+    session.run_always("maturin", "develop", "-r")
+    session.run("pytest", "--benchmark-only")

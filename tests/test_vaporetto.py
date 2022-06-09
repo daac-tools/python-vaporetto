@@ -27,6 +27,15 @@ def test_tokenlist_iter():
         token.surface() for token in tokens)
 
 
+def test_tokenlist_iter_positions():
+    with open(MODEL_PATH, 'rb') as fp:
+        tokenizer = vaporetto.Vaporetto(fp.read())
+    tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
+
+    assert [(0, 2), (2, 4), (4, 5), (5, 7), (7, 8), (8, 9)] == list(
+        (token.start(), token.end()) for token in tokens)
+
+
 def test_wsconst():
     with open(MODEL_PATH, 'rb') as fp:
         tokenizer = vaporetto.Vaporetto(fp.read(), wsconst='K')
