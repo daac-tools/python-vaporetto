@@ -342,13 +342,14 @@ impl Vaporetto {
             let tag_cache = &mut self.tag_cache.borrow_mut();
             for tag in s.tags() {
                 tags.push(tag.as_ref().map(|tag| {
-                    if let Some(py_tag) = tag_cache.get(tag.as_ref()) {
-                        py_tag.clone_ref(py)
-                    } else {
-                        let py_tag: Py<PyUnicode> = PyUnicode::new(py, tag.as_ref()).into();
-                        tag_cache.insert(tag.to_string(), py_tag.clone_ref(py));
-                        py_tag
-                    }
+                    tag_cache
+                        .raw_entry_mut()
+                        .from_key(tag.as_ref())
+                        .or_insert_with(|| {
+                            (tag.to_string(), PyUnicode::new(py, tag.as_ref()).into())
+                        })
+                        .1
+                        .clone_ref(py)
                 }));
             }
             TokenList {
