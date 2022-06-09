@@ -69,3 +69,8 @@ Licensed under either of
    ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
+
+## Disclaimer
+
+This software is developed by LegalForce, Inc.,
+but not an officially supported LegalForce product.
