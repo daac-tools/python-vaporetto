@@ -43,8 +43,15 @@ def test_vaporetto_count_tokens_bench(benchmark):
     benchmark(vaporetto_count_tokens, tokenizer, corpus)
 
 
-def test_sudachi_count_tokens_bench(benchmark):
+def test_sudachi_a_count_tokens_bench(benchmark):
     corpus = dataset.load_wagahaiwa_nekodearu()
     tokenizer = sudachi_dictionary.Dictionary().create()
     mode = sudachi_tokenizer.Tokenizer.SplitMode.A
+    benchmark(sudachi_count_tokens, tokenizer, mode, corpus)
+
+
+def test_sudachi_c_count_tokens_bench(benchmark):
+    corpus = dataset.load_wagahaiwa_nekodearu()
+    tokenizer = sudachi_dictionary.Dictionary().create()
+    mode = sudachi_tokenizer.Tokenizer.SplitMode.C
     benchmark(sudachi_count_tokens, tokenizer, mode, corpus)

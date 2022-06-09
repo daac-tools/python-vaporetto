@@ -43,8 +43,15 @@ def test_vaporetto_cat_surfaces_bench(benchmark):
     benchmark(vaporetto_cat_surfaces, tokenizer, corpus)
 
 
-def test_sudachi_cat_surfaces_bench(benchmark):
+def test_sudachi_a_cat_surfaces_bench(benchmark):
     corpus = dataset.load_wagahaiwa_nekodearu()
     tokenizer = sudachi_dictionary.Dictionary().create()
     mode = sudachi_tokenizer.Tokenizer.SplitMode.A
+    benchmark(sudachi_cat_surfaces, tokenizer, mode, corpus)
+
+
+def test_sudachi_c_cat_surfaces_bench(benchmark):
+    corpus = dataset.load_wagahaiwa_nekodearu()
+    tokenizer = sudachi_dictionary.Dictionary().create()
+    mode = sudachi_tokenizer.Tokenizer.SplitMode.C
     benchmark(sudachi_cat_surfaces, tokenizer, mode, corpus)
