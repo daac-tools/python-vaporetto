@@ -39,7 +39,7 @@ def test_vaporetto_cat_surfaces_bench(benchmark):
     corpus = dataset.load_wagahaiwa_nekodearu()
     with open(model_path, 'rb') as fp:
         model_data = fp.read()
-    tokenizer = vaporetto.Vaporetto(model_data)
+    tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model_data)
     benchmark(vaporetto_cat_surfaces, tokenizer, corpus)
 
 

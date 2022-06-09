@@ -11,6 +11,15 @@ To use Vaporetto, run the following command:
 $ pip install vaporetto
 ```
 
+Or you can also build from the source:
+
+```
+$ python -m venv .env
+$ source .env/bin/activate
+$ pip install maturin
+$ maturin build
+```
+
 ## Example Usage
 
 ```python
