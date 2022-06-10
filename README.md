@@ -50,7 +50,7 @@ tokens[0].tag(0)
 tokens[0].tag(1)
 #=> 'マー'
 [token.surface() for token in tokens]
-#=> ['まぁ', '社長', 'は', '火星', '猫', 'だ']]
+#=> ['まぁ', '社長', 'は', '火星', '猫', 'だ']
 ```
 
 You can also use KyTea's models as follows:
@@ -73,7 +73,7 @@ import vaporetto
 help(vaporetto)
 ```
 
-## [Speed Comparison](https://github.com/legalforce-research/python-vaporetto/wiki/Speed-Comparison)
+## [Speed Comparison](https://github.com/daac-tools/python-vaporetto/wiki/Speed-Comparison)
 
 ## License
 
