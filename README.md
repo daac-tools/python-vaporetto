@@ -73,6 +73,8 @@ import vaporetto
 help(vaporetto)
 ```
 
+## [Speed Comparison](https://github.com/legalforce-research/python-vaporetto/wiki/Speed-Comparison)
+
 ## License
 
 Licensed under either of
