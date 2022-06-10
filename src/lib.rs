@@ -316,11 +316,11 @@ impl Vaporetto {
         norm: bool,
     ) -> PyResult<Self> {
         let f = Cursor::new(model);
-        let kytea_model = py.allow_threads(|| {
-            KyteaModel::read(f).map_err(|e| PyValueError::new_err(e.to_string()))
+        let model = py.allow_threads(|| {
+            let kytea_model =
+                KyteaModel::read(f).map_err(|e| PyValueError::new_err(e.to_string()))?;
+            Model::try_from(kytea_model).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
-        let model =
-            Model::try_from(kytea_model).map_err(|e| PyValueError::new_err(e.to_string()))?;
         Self::create_internal(py, model, predict_tags, wsconst, norm)
     }
 
