@@ -23,7 +23,7 @@ $ maturin develop -r
 ## Example Usage
 
 python-vaporetto does not contain model files.
-To perform tokenization, follow [the document of Vaporetto](https://github.com/daac-tools/vaporetto) to download distribution models or train your own models before hand.
+To perform tokenization, follow [the document of Vaporetto](https://github.com/daac-tools/vaporetto) to download distribution models or train your own models beforehand.
 
 ```python
 # Import vaporetto module
