@@ -252,7 +252,7 @@ impl Vaporetto {
         let predict_tags = self.predict_tags;
         if let Some(normalizer) = normalizer {
             // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-            // cannot have such a Sentence, so we use transmute() to disguise lifetimes.
+            // cannot have such a Sentence, so we use transmute() to fake lifetimes.
             let norm_s = &mut self.sentence_buf2.borrow_mut();
             let norm_s = unsafe {
                 std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(
@@ -342,7 +342,7 @@ impl Vaporetto {
     #[pyo3(text_signature = "($self, text, /)")]
     fn tokenize(&self, py: Python, text: &str) -> TokenList {
         // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-        // cannot have such a Sentence, so we use transmute() to disguise lifetimes.
+        // cannot have such a Sentence, so we use transmute() to fake lifetimes.
         let s = &mut self.sentence_buf1.borrow_mut();
         let s = unsafe {
             std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(s)
@@ -402,7 +402,7 @@ impl Vaporetto {
     fn tokenize_to_string(&self, py: Python, text: &str) -> Py<PyUnicode> {
         let buf = &mut self.string_buf.borrow_mut();
         // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-        // cannot have such a Sentence, so we use transmute() to disguise lifetimes.
+        // cannot have such a Sentence, so we use transmute() to fake lifetimes.
         let s = &mut self.sentence_buf1.borrow_mut();
         let s = unsafe {
             std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(s)
