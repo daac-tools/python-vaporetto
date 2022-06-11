@@ -172,7 +172,7 @@ impl TokenList {
 ///     >>> tokens[0].tag(1)
 ///     'マー'
 ///     >>> [token.surface() for token in tokens]
-///     ['まぁ', '社長', 'は', '火星', '猫', 'だ']]
+///     ['まぁ', '社長', 'は', '火星', '猫', 'だ']
 ///
 /// :param model: A byte sequence of the model.
 /// :param predict_tags: If True, the tokenizer predicts tags.
