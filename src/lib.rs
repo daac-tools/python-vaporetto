@@ -120,9 +120,9 @@ impl TokenIterator {
         }
     }
 }
-#[pyclass]
 
 /// Token list returned by the tokenizer.
+#[pyclass]
 struct TokenList {
     surfaces: Vec<(Py<PyUnicode>, usize, usize)>,
     tags: Vec<Option<Py<PyUnicode>>>,
