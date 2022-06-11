@@ -294,8 +294,8 @@ impl Vaporetto {
         let mut buff = vec![];
         let (model, _) = py.allow_threads(|| {
             let mut f = Cursor::new(model);
-            let mut decoder = ruzstd::StreamingDecoder::new(&mut f)
-                .map_err(PyValueError::new_err)?;
+            let mut decoder =
+                ruzstd::StreamingDecoder::new(&mut f).map_err(PyValueError::new_err)?;
             decoder
                 .read_to_end(&mut buff)
                 .map_err(|e| PyValueError::new_err(e.to_string()))?;
