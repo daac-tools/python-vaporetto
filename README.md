@@ -3,6 +3,9 @@
 [Vaporetto](https://github.com/daac-tools/vaporetto) is a fast and lightweight pointwise prediction based tokenizer.
 This is a Python wrapper for Vaporetto.
 
+[![PyPI](https://img.shields.io/pypi/v/vaporetto)](https://pypi.org/project/vaporetto/)
+[![Build Status](https://github.com/daac-tools/python-vaporetto/actions/workflows/CI.yml/badge.svg)](https://github.com/daac-tools/python-vaporetto/actions)
+
 ## Installation
 
 To use Vaporetto, run the following command:
