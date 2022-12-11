@@ -25,8 +25,8 @@ jobs:
     - name: Test package
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        pip install daachorse --no-index --find-links target/wheels --force-reinstall
+        pip install pytest
+        pip install vaporetto --no-index --find-links target/wheels --force-reinstall
         pytest
 
   pack-sdist:
