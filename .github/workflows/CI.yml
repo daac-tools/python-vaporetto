@@ -27,7 +27,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install vaporetto --no-index --find-links target/wheels --force-reinstall
-        pytest
+        pytest tests/test_vaporetto.py
 
   pack-sdist:
     needs: [ test ]
