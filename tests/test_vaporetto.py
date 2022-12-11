@@ -1,8 +1,16 @@
-import os.path
+import pathlib
 
 import vaporetto
 
-MODEL_PATH = os.path.dirname(__file__) + '/data/model.zst'
+MODEL_PATH = pathlib.PurePath(__file__).parent / 'data/model.zst'
+
+
+def test_tokenlist_empty():
+    with open(MODEL_PATH, 'rb') as fp:
+        tokenizer = vaporetto.Vaporetto(fp.read())
+    tokens = tokenizer.tokenize('')
+
+    assert [] == list(tokens)
 
 
 def test_tokenlist_index():
@@ -61,6 +69,12 @@ def test_tags_2():
 
     assert ['マー', 'シャチョー', 'ワ', 'カセー', 'ネコ', 'ダ'] == list(
         token.tag(1) for token in tokens)
+
+
+def test_tokenize_to_string_empty():
+    with open(MODEL_PATH, 'rb') as fp:
+        tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags=True)
+    assert '' == tokenizer.tokenize_to_string('')
 
 
 def test_tokenize_to_string():
