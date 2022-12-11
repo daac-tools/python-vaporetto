@@ -1,16 +1,17 @@
-use std::cell::RefCell;
 use std::fmt::Write;
-use std::io::{Cursor, Read};
+use std::io::Read;
 
 use pyo3::{exceptions::PyValueError, prelude::*, types::PyUnicode};
 
 use hashbrown::HashMap;
-use vaporetto::{CharacterType, KyteaModel, Model, Predictor, Sentence};
+use ouroboros::self_referencing;
 use vaporetto_rules::{
     sentence_filters::{ConcatGraphemeClustersFilter, KyteaWsConstFilter},
     string_filters::KyteaFullwidthFilter,
     SentenceFilter, StringFilter,
 };
+use vaporetto_rust::errors::VaporettoError;
+use vaporetto_rust::{CharacterType, KyteaModel, Model, Predictor, Sentence};
 
 /// Representation of a token.
 #[pyclass]
@@ -153,6 +154,63 @@ impl TokenList {
     }
 }
 
+#[self_referencing]
+struct PredictorWrapper {
+    predictor: Predictor,
+    #[borrows(predictor)]
+    #[covariant]
+    sentence_buf: Sentence<'static, 'this>,
+    #[borrows(predictor)]
+    #[covariant]
+    norm_sentence_buf: Sentence<'static, 'this>,
+}
+
+impl PredictorWrapper {
+    fn predict(
+        &mut self,
+        text: String,
+        predict_tags: bool,
+        normalize: bool,
+        post_filters: &[Box<dyn SentenceFilter>],
+    ) -> Result<(), VaporettoError> {
+        self.with_mut(|self_| {
+            self_.sentence_buf.update_raw(text)?;
+            if normalize {
+                let normalizer = KyteaFullwidthFilter;
+                let norm_text = normalizer.filter(self_.sentence_buf.as_raw_text());
+                self_.norm_sentence_buf.update_raw(norm_text)?;
+                self_.predictor.predict(self_.norm_sentence_buf);
+                post_filters
+                    .iter()
+                    .for_each(|filter| filter.filter(self_.norm_sentence_buf));
+                self_
+                    .sentence_buf
+                    .boundaries_mut()
+                    .copy_from_slice(self_.norm_sentence_buf.boundaries());
+                if predict_tags {
+                    self_.norm_sentence_buf.fill_tags();
+                    self_
+                        .sentence_buf
+                        .reset_tags(self_.norm_sentence_buf.n_tags());
+                    self_
+                        .sentence_buf
+                        .tags_mut()
+                        .clone_from_slice(self_.norm_sentence_buf.tags());
+                }
+            } else {
+                self_.predictor.predict(self_.sentence_buf);
+                post_filters
+                    .iter()
+                    .for_each(|filter| filter.filter(self_.sentence_buf));
+                if predict_tags {
+                    self_.sentence_buf.fill_tags();
+                }
+            }
+            Ok(())
+        })
+    }
+}
+
 /// Python binding of Vaporetto tokenizer.
 ///
 /// Examples:
@@ -186,15 +244,13 @@ impl TokenList {
 #[pyclass]
 #[pyo3(text_signature = "($self, model, /, predict_tags = False, wsconst = \"\", norm = True)")]
 struct Vaporetto {
-    predictor: Predictor,
+    wrapper: PredictorWrapper,
     predict_tags: bool,
-    normalizer: Option<KyteaFullwidthFilter>,
+    normalize: bool,
     post_filters: Vec<Box<dyn SentenceFilter>>,
     word_cache: HashMap<String, Py<PyUnicode>>,
-    tag_cache: RefCell<HashMap<String, Py<PyUnicode>>>,
-    string_buf: RefCell<String>,
-    sentence_buf1: RefCell<Sentence<'static, 'static>>,
-    sentence_buf2: RefCell<Sentence<'static, 'static>>,
+    tag_cache: HashMap<String, Py<PyUnicode>>,
+    string_buf: String,
 }
 
 impl Vaporetto {
@@ -203,7 +259,7 @@ impl Vaporetto {
         model: Model,
         predict_tags: bool,
         wsconst: &str,
-        norm: bool,
+        normalize: bool,
     ) -> PyResult<Self> {
         // For efficiency, this library creates PyStrings of dictionary words beforehand and uses
         // them if available instead of creating PyStrings every time.
@@ -217,7 +273,6 @@ impl Vaporetto {
             Predictor::new(model, predict_tags).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
 
-        let normalizer = norm.then(|| KyteaFullwidthFilter);
         let mut post_filters: Vec<Box<dyn SentenceFilter>> = vec![];
         for c in wsconst.chars() {
             post_filters.push(match c {
@@ -232,51 +287,22 @@ impl Vaporetto {
             });
         }
 
-        Ok(Self {
+        let wrapper = PredictorWrapperBuilder {
             predictor,
+            sentence_buf_builder: |_| Sentence::default(),
+            norm_sentence_buf_builder: |_| Sentence::default(),
+        }
+        .build();
+
+        Ok(Self {
+            wrapper,
             predict_tags,
-            normalizer,
+            normalize,
             post_filters,
             word_cache,
-            tag_cache: RefCell::new(HashMap::new()),
-            string_buf: RefCell::new(String::new()),
-            sentence_buf1: RefCell::new(Sentence::default()),
-            sentence_buf2: RefCell::new(Sentence::default()),
+            tag_cache: HashMap::new(),
+            string_buf: String::new(),
         })
-    }
-
-    fn tokenize_internal<'a>(&'a self, s: &mut Sentence<'_, 'a>) {
-        let predictor = &self.predictor;
-        let normalizer = &self.normalizer;
-        let post_filters = &self.post_filters;
-        let predict_tags = self.predict_tags;
-        if let Some(normalizer) = normalizer {
-            // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-            // cannot have such a Sentence, so we use transmute() to fake lifetimes.
-            let norm_s = &mut self.sentence_buf2.borrow_mut();
-            let norm_s = unsafe {
-                std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(
-                    norm_s,
-                )
-            };
-            norm_s
-                .update_raw(normalizer.filter(s.as_raw_text()))
-                .unwrap();
-            predictor.predict(norm_s);
-            post_filters.iter().for_each(|filter| filter.filter(norm_s));
-            s.boundaries_mut().copy_from_slice(norm_s.boundaries());
-            if predict_tags {
-                norm_s.fill_tags();
-                s.reset_tags(norm_s.n_tags());
-                s.tags_mut().clone_from_slice(norm_s.tags());
-            }
-        } else {
-            predictor.predict(s);
-            post_filters.iter().for_each(|filter| filter.filter(s));
-            if predict_tags {
-                s.fill_tags();
-            }
-        }
     }
 }
 
@@ -291,15 +317,14 @@ impl Vaporetto {
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
-        let mut buff = vec![];
+        let mut buf = vec![];
         let (model, _) = py.allow_threads(|| {
-            let mut f = Cursor::new(model);
-            let mut decoder =
-                ruzstd::StreamingDecoder::new(&mut f).map_err(PyValueError::new_err)?;
-            decoder
-                .read_to_end(&mut buff)
+            let mut decoder = ruzstd::StreamingDecoder::new(model)
                 .map_err(|e| PyValueError::new_err(e.to_string()))?;
-            Model::read_slice(&buff).map_err(|e| PyValueError::new_err(e.to_string()))
+            decoder
+                .read_to_end(&mut buf)
+                .map_err(|e| PyValueError::new_err(e.to_string()))?;
+            Model::read_slice(&buf).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
         Self::create_internal(py, model, predict_tags, wsconst, norm)
     }
@@ -325,10 +350,9 @@ impl Vaporetto {
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
-        let f = Cursor::new(model);
         let model = py.allow_threads(|| {
             let kytea_model =
-                KyteaModel::read(f).map_err(|e| PyValueError::new_err(e.to_string()))?;
+                KyteaModel::read(model).map_err(|e| PyValueError::new_err(e.to_string()))?;
             Model::try_from(kytea_model).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
         Self::create_internal(py, model, predict_tags, wsconst, norm)
@@ -340,56 +364,50 @@ impl Vaporetto {
     /// :type text: str
     /// :type out: vaporetto.TokenList
     #[pyo3(text_signature = "($self, text, /)")]
-    fn tokenize(&self, py: Python, text: &str) -> TokenList {
-        // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-        // cannot have such a Sentence, so we use transmute() to fake lifetimes.
-        let s = &mut self.sentence_buf1.borrow_mut();
-        let s = unsafe {
-            std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(s)
-        };
-        if s.update_raw(text).is_ok() {
-            self.tokenize_internal(s);
-
-            // Creates TokenIterator
-            let surfaces = s
-                .iter_tokens()
-                .map(|token| {
-                    let surface = self
-                        .word_cache
-                        .get(token.surface())
-                        .map(|surf| surf.clone_ref(py))
-                        .unwrap_or_else(|| PyUnicode::new(py, token.surface()).into());
-                    (surface, token.start(), token.end())
-                })
-                .collect();
-            let tag_cache = &mut self.tag_cache.borrow_mut();
-            let tags = s
-                .tags()
-                .iter()
-                .map(|tag| {
-                    tag.as_ref().map(|tag| {
-                        tag_cache
-                            .raw_entry_mut()
-                            .from_key(tag.as_ref())
-                            .or_insert_with(|| {
-                                (tag.to_string(), PyUnicode::new(py, tag.as_ref()).into())
-                            })
-                            .1
-                            .clone_ref(py)
-                    })
-                })
-                .collect();
-            TokenList {
-                surfaces,
-                tags,
-                n_tags: s.n_tags(),
-            }
-        } else {
-            TokenList {
+    fn tokenize(&mut self, py: Python, text: String) -> TokenList {
+        if self
+            .wrapper
+            .predict(text, self.predict_tags, self.normalize, &self.post_filters)
+            .is_err()
+        {
+            return TokenList {
                 surfaces: vec![],
                 tags: vec![],
                 n_tags: 0,
-            }
+            };
+        }
+        let s = self.wrapper.borrow_sentence_buf();
+        let surfaces = s
+            .iter_tokens()
+            .map(|token| {
+                let surface = self
+                    .word_cache
+                    .get(token.surface())
+                    .map(|surf| surf.clone_ref(py))
+                    .unwrap_or_else(|| PyUnicode::new(py, token.surface()).into());
+                (surface, token.start(), token.end())
+            })
+            .collect();
+        let tags = s
+            .tags()
+            .iter()
+            .map(|tag| {
+                tag.as_ref().map(|tag| {
+                    self.tag_cache
+                        .raw_entry_mut()
+                        .from_key(tag.as_ref())
+                        .or_insert_with(|| {
+                            (tag.to_string(), PyUnicode::new(py, tag.as_ref()).into())
+                        })
+                        .1
+                        .clone_ref(py)
+                })
+            })
+            .collect();
+        TokenList {
+            surfaces,
+            tags,
+            n_tags: s.n_tags(),
         }
     }
 
@@ -399,19 +417,19 @@ impl Vaporetto {
     /// :type text: str
     /// :type out: str
     #[pyo3(text_signature = "($self, text, /)")]
-    fn tokenize_to_string(&self, py: Python, text: &str) -> Py<PyUnicode> {
-        let buf = &mut self.string_buf.borrow_mut();
-        // Sentence buffer requires lifetimes of text and predictor, but the Vaporetto struct
-        // cannot have such a Sentence, so we use transmute() to fake lifetimes.
-        let s = &mut self.sentence_buf1.borrow_mut();
-        let s = unsafe {
-            std::mem::transmute::<&mut Sentence<'static, 'static>, &mut Sentence<'_, '_>>(s)
-        };
-        if s.update_raw(text).is_ok() {
-            self.tokenize_internal(s);
-            s.write_tokenized_text(buf);
+    fn tokenize_to_string(&mut self, py: Python, text: String) -> Py<PyUnicode> {
+        if self
+            .wrapper
+            .predict(text, self.predict_tags, self.normalize, &self.post_filters)
+            .is_ok()
+        {
+            self.wrapper
+                .borrow_sentence_buf()
+                .write_tokenized_text(&mut self.string_buf);
+        } else {
+            self.string_buf.clear();
         }
-        PyUnicode::new(py, buf).into()
+        PyUnicode::new(py, &self.string_buf).into()
     }
 }
 
