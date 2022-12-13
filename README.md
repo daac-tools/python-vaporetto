@@ -8,19 +8,27 @@ This is a Python wrapper for Vaporetto.
 
 ## Installation
 
-To use Vaporetto, run the following command:
+### Install pre-built package from PyPI
+
+Run the following command:
 
 ```
 $ pip install vaporetto
 ```
 
-Or you can also build from the source:
+### Build from source
+
+You need to install the Rust compiler following [the documentation](https://www.rust-lang.org/tools/install) beforehand.
+daachorse uses `pyproject.toml`, so you also need to upgrade pip to version 19 or later.
 
 ```
-$ python -m venv .env
-$ source .env/bin/activate
-$ pip install maturin
-$ maturin develop -r
+$ pip install --upgrade pip
+```
+
+After setting up the environment, you can install daachorse as follows:
+
+```
+$ pip install git+https://github.com/daac-tools/python-vaporetto
 ```
 
 ## Example Usage
