@@ -97,7 +97,6 @@ Licensed under either of
 
 at your option.
 
-## Disclaimer
+## Contribution
 
-This software is developed by LegalForce, Inc.,
-but not an officially supported LegalForce product.
+See [the guidelines](./CONTRIBUTING.md).
