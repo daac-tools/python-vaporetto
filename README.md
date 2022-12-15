@@ -5,6 +5,7 @@ This is a Python wrapper for Vaporetto.
 
 [![PyPI](https://img.shields.io/pypi/v/vaporetto)](https://pypi.org/project/vaporetto/)
 [![Build Status](https://github.com/daac-tools/python-vaporetto/actions/workflows/CI.yml/badge.svg)](https://github.com/daac-tools/python-vaporetto/actions)
+[![Documentation Status](https://readthedocs.org/projects/python-vaporetto/badge/?version=latest)](https://python-vaporetto.readthedocs.io/en/latest/?badge=latest)
 
 ## Installation
 
@@ -74,15 +75,6 @@ tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
 ```
 
 Note: Vaporetto does not support tag prediction with KyTea's models.
-
-## Documentation
-
-Use the help function to show the API reference.
-
-```python
-import vaporetto
-help(vaporetto)
-```
 
 ## [Speed Comparison](https://github.com/daac-tools/python-vaporetto/wiki/Speed-Comparison)
 

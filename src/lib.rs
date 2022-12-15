@@ -98,7 +98,7 @@ impl Token {
     }
 }
 
-/// Iterator of tokens.
+/// Iterator that returns :class:`.Token`.
 #[pyclass]
 struct TokenIterator {
     list: Py<TokenList>,
@@ -122,7 +122,7 @@ impl TokenIterator {
     }
 }
 
-/// Token list returned by the tokenizer.
+/// List of :class:`.Token` returned by the tokenizer.
 #[pyclass]
 struct TokenList {
     surfaces: Vec<(Py<PyUnicode>, usize, usize)>,
@@ -244,7 +244,7 @@ impl PredictorWrapper {
 /// :raises ValueError: if the model is invalid.
 /// :raises ValueError: if the wsconst value is invalid.
 #[pyclass]
-#[pyo3(text_signature = "($self, model, /, predict_tags = False, wsconst = \"\", norm = True)")]
+#[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
 struct Vaporetto {
     wrapper: PredictorWrapper,
     predict_tags: bool,
@@ -441,6 +441,7 @@ impl Vaporetto {
 fn vaporetto(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Vaporetto>()?;
     m.add_class::<TokenList>()?;
+    m.add_class::<TokenIterator>()?;
     m.add_class::<Token>()?;
     Ok(())
 }
