@@ -132,18 +132,10 @@ struct TokenList {
 
 #[pymethods]
 impl TokenList {
-    /// Return len(self).
-    ///
-    /// :rtype: int
     fn __len__(&self) -> usize {
         self.surfaces.len()
     }
 
-    /// Return self[index].
-    ///
-    /// :param index: Index of the element.
-    /// :type index: int
-    /// :rtype: vaporetto.Token
     fn __getitem__(self_: Py<Self>, py: Python, index: usize) -> PyResult<Token> {
         if index < self_.borrow(py).surfaces.len() {
             Ok(Token { list: self_, index })
@@ -152,9 +144,6 @@ impl TokenList {
         }
     }
 
-    /// Return iter(self).
-    ///
-    /// :rtype: vaporetto.TokenIterator
     fn __iter__(self_: Py<Self>, py: Python) -> TokenIterator {
         let len = self_.borrow(py).surfaces.len();
         TokenIterator {
@@ -255,7 +244,7 @@ impl PredictorWrapper {
 /// :raises ValueError: if the model is invalid.
 /// :raises ValueError: if the wsconst value is invalid.
 #[pyclass]
-#[pyo3(text_signature = "($self, model, /, predict_tags = False, wsconst = \"\", norm = True)")]
+#[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
 struct Vaporetto {
     wrapper: PredictorWrapper,
     predict_tags: bool,
