@@ -98,7 +98,7 @@ impl Token {
     }
 }
 
-/// Iterator of tokens.
+/// Iterator that returns :class:`.Token`.
 #[pyclass]
 struct TokenIterator {
     list: Py<TokenList>,
@@ -122,7 +122,7 @@ impl TokenIterator {
     }
 }
 
-/// Token list returned by the tokenizer.
+/// List of :class:`.Token` returned by the tokenizer.
 #[pyclass]
 struct TokenList {
     surfaces: Vec<(Py<PyUnicode>, usize, usize)>,
@@ -132,10 +132,18 @@ struct TokenList {
 
 #[pymethods]
 impl TokenList {
+    /// Return len(self).
+    ///
+    /// :rtype: int
     fn __len__(&self) -> usize {
         self.surfaces.len()
     }
 
+    /// Return self[index].
+    ///
+    /// :param index: Index of the element.
+    /// :type index: int
+    /// :rtype: vaporetto.Token
     fn __getitem__(self_: Py<Self>, py: Python, index: usize) -> PyResult<Token> {
         if index < self_.borrow(py).surfaces.len() {
             Ok(Token { list: self_, index })
@@ -144,6 +152,9 @@ impl TokenList {
         }
     }
 
+    /// Return iter(self).
+    ///
+    /// :rtype: vaporetto.TokenIterator
     fn __iter__(self_: Py<Self>, py: Python) -> TokenIterator {
         let len = self_.borrow(py).surfaces.len();
         TokenIterator {
@@ -441,6 +452,7 @@ impl Vaporetto {
 fn vaporetto(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Vaporetto>()?;
     m.add_class::<TokenList>()?;
+    m.add_class::<TokenIterator>()?;
     m.add_class::<Token>()?;
     Ok(())
 }
