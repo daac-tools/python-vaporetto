@@ -76,15 +76,6 @@ tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
 
 Note: Vaporetto does not support tag prediction with KyTea's models.
 
-## Documentation
-
-Use the help function to show the API reference.
-
-```python
-import vaporetto
-help(vaporetto)
-```
-
 ## [Speed Comparison](https://github.com/daac-tools/python-vaporetto/wiki/Speed-Comparison)
 
 ## License
