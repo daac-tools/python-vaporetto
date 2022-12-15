@@ -37,7 +37,7 @@ The following example tokenizes a string using a Vaporetto model.
 Tokenize with KyTea model
 -------------------------
 
-If you want to use a KyTea model, use `create_from_kytea_model()` instead.
+If you want to use a KyTea model, use ``create_from_kytea_model()`` instead.
 
 .. code-block:: python
 
