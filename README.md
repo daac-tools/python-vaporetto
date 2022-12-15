@@ -5,6 +5,7 @@ This is a Python wrapper for Vaporetto.
 
 [![PyPI](https://img.shields.io/pypi/v/vaporetto)](https://pypi.org/project/vaporetto/)
 [![Build Status](https://github.com/daac-tools/python-vaporetto/actions/workflows/CI.yml/badge.svg)](https://github.com/daac-tools/python-vaporetto/actions)
+[![Documentation Status](https://readthedocs.org/projects/python-vaporetto/badge/?version=latest)](https://python-vaporetto.readthedocs.io/en/latest/?badge=latest)
 
 ## Installation
 
