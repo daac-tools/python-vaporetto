@@ -24,7 +24,7 @@ struct Token {
 impl Token {
     /// Return the surface of this token.
     ///
-    /// :type out: str
+    /// :rtype: str
     #[pyo3(text_signature = "($self, /)")]
     fn surface(&self, py: Python) -> Py<PyUnicode> {
         self.list.borrow(py).surfaces[self.index].0.clone_ref(py)
@@ -32,7 +32,7 @@ impl Token {
 
     /// Return the start position (inclusive) in characters.
     ///
-    /// :type out: int
+    /// :rtype: int
     #[pyo3(text_signature = "($self, /)")]
     fn start(&self, py: Python) -> usize {
         self.list.borrow(py).surfaces[self.index].1
@@ -40,18 +40,18 @@ impl Token {
 
     /// Return the end position (exclusive) in characters.
     ///
-    /// :type out: int
+    /// :rtype: int
     #[pyo3(text_signature = "($self, /)")]
     fn end(&self, py: Python) -> usize {
         self.list.borrow(py).surfaces[self.index].2
     }
 
-    /// Return the tag assigned to a given index. If the index is out of range,
-    /// this functuon throws a ValueError.
+    /// Return the tag assigned to a given index.
     ///
     /// :param index: An index of the set of tags
     /// :type index: int
-    /// :type out: Optional[str]
+    /// :rtype: Optional[str]
+    /// :raises ValueError: if the index is out of range.
     #[pyo3(text_signature = "($self, index, /)")]
     fn tag(&self, py: Python, index: usize) -> PyResult<Option<Py<PyUnicode>>> {
         let list = self.list.borrow(py);
@@ -67,7 +67,7 @@ impl Token {
 
     /// Return the number of tags assigned to this token.
     ///
-    /// :type out: int
+    /// :rtype: int
     #[pyo3(text_signature = "($self, /)")]
     fn n_tags(&self, py: Python) -> usize {
         self.list.borrow(py).n_tags
@@ -240,7 +240,9 @@ impl PredictorWrapper {
 /// :type predict_tags: bool
 /// :type wsconst: str
 /// :type norm: bool
-/// :type out: vaporetto.Vaporetto
+/// :rtype: vaporetto.Vaporetto
+/// :raises ValueError: if the model is invalid.
+/// :raises ValueError: if the wsconst value is invalid.
 #[pyclass]
 #[pyo3(text_signature = "($self, model, /, predict_tags = False, wsconst = \"\", norm = True)")]
 struct Vaporetto {
@@ -339,7 +341,9 @@ impl Vaporetto {
     /// :type predict_tags: bool
     /// :type wsconst: str
     /// :type norm: bool
-    /// :type out: vaporetto.Vaporetto
+    /// :rtype: vaporetto.Vaporetto
+    /// :raises ValueError: if the model is invalid.
+    /// :raises ValueError: if the wsconst value is invalid.
     #[staticmethod]
     #[args(predict_tags = "false", wsconst = "\"\"", norm = "true")]
     #[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
@@ -362,7 +366,7 @@ impl Vaporetto {
     ///
     /// :param text: A text to tokenize.
     /// :type text: str
-    /// :type out: vaporetto.TokenList
+    /// :rtype: vaporetto.TokenList
     #[pyo3(text_signature = "($self, text, /)")]
     fn tokenize(&mut self, py: Python, text: String) -> TokenList {
         if self
@@ -415,7 +419,7 @@ impl Vaporetto {
     ///
     /// :param text: A text to tokenize.
     /// :type text: str
-    /// :type out: str
+    /// :rtype: str
     #[pyo3(text_signature = "($self, text, /)")]
     fn tokenize_to_string(&mut self, py: Python, text: String) -> Py<PyUnicode> {
         if self
