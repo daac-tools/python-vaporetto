@@ -1,6 +1,6 @@
 [package]
 name = "python-vaporetto"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Koichi Akabe <vbkaisetsu@gmail.com>"]
 description = "Python wrapper of Vaporetto tokenizer"
@@ -14,9 +14,9 @@ name = "vaporetto"
 crate-type = ["cdylib"]
 
 [dependencies]
-hashbrown = "0.13.1"  # MIT or Apache-2.0
+hashbrown = "0.13.2"  # MIT or Apache-2.0
 ouroboros = "0.15.5"  # MIT or Apache-2.0
-pyo3 = { version = "0.17.3", features = ["extension-module"] }  # Apache-2.0
+pyo3 = { version = "0.18.0", features = ["extension-module"] }  # Apache-2.0
 ruzstd = "0.3.0"  # MIT
 vaporetto_rust = { package = "vaporetto", version = "0.6.1", features = ["kytea"] }  # MIT or Apache-2.0
 vaporetto_rules = "0.6.1"  # MIT or Apache-2.0
