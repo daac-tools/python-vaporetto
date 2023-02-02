@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import vaporetto
 import Mykytea  # type: ignore[import]
 from sudachipy import tokenizer as sudachi_tokenizer  # type: ignore[import]
