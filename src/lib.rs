@@ -333,24 +333,23 @@ impl Vaporetto {
 
     /// Create a new Vaporetto instance from a KyTea's model.
     ///
+    /// Vaporetto does not support tag prediction with KyTea's model.
+    ///
     /// :param model: A byte sequence of the model.
-    /// :param predict_tags: If True, the tokenizer predicts tags.
     /// :param wsconst: Does not split the specified character types.
     /// :param norm: If True, input texts will be normalized beforehand.
     /// :type model: bytes
-    /// :type predict_tags: bool
     /// :type wsconst: str
     /// :type norm: bool
     /// :rtype: vaporetto.Vaporetto
     /// :raises ValueError: if the model is invalid.
     /// :raises ValueError: if the wsconst value is invalid.
     #[staticmethod]
-    #[args(predict_tags = "false", wsconst = "\"\"", norm = "true")]
-    #[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
+    #[args(wsconst = "\"\"", norm = "true")]
+    #[pyo3(text_signature = "(model, /, wsconst = \"\", norm = True)")]
     fn create_from_kytea_model(
         py: Python,
         model: &[u8],
-        predict_tags: bool,
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
@@ -359,7 +358,7 @@ impl Vaporetto {
                 KyteaModel::read(model).map_err(|e| PyValueError::new_err(e.to_string()))?;
             Model::try_from(kytea_model).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
-        Self::create_internal(py, model, predict_tags, wsconst, norm)
+        Self::create_internal(py, model, false, wsconst, norm)
     }
 
     /// Tokenize a given text and return as a list of tokens.
