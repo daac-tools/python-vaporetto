@@ -25,7 +25,6 @@ impl Token {
     /// Return the surface of this token.
     ///
     /// :rtype: str
-    #[pyo3(text_signature = "($self, /)")]
     fn surface(&self, py: Python) -> Py<PyUnicode> {
         self.list.borrow(py).surfaces[self.index].0.clone_ref(py)
     }
@@ -33,7 +32,6 @@ impl Token {
     /// Return the start position (inclusive) in characters.
     ///
     /// :rtype: int
-    #[pyo3(text_signature = "($self, /)")]
     fn start(&self, py: Python) -> usize {
         self.list.borrow(py).surfaces[self.index].1
     }
@@ -41,7 +39,6 @@ impl Token {
     /// Return the end position (exclusive) in characters.
     ///
     /// :rtype: int
-    #[pyo3(text_signature = "($self, /)")]
     fn end(&self, py: Python) -> usize {
         self.list.borrow(py).surfaces[self.index].2
     }
@@ -52,7 +49,7 @@ impl Token {
     /// :type index: int
     /// :rtype: Optional[str]
     /// :raises ValueError: if the index is out of range.
-    #[pyo3(text_signature = "($self, index, /)")]
+    #[pyo3(signature = (index, /))]
     fn tag(&self, py: Python, index: usize) -> PyResult<Option<Py<PyUnicode>>> {
         let list = self.list.borrow(py);
         if index < list.n_tags {
@@ -68,7 +65,6 @@ impl Token {
     /// Return the number of tags assigned to this token.
     ///
     /// :rtype: int
-    #[pyo3(text_signature = "($self, /)")]
     fn n_tags(&self, py: Python) -> usize {
         self.list.borrow(py).n_tags
     }
@@ -235,6 +231,9 @@ impl PredictorWrapper {
 /// :param model: A byte sequence of the model.
 /// :param predict_tags: If True, the tokenizer predicts tags.
 /// :param wsconst: Does not split the specified character types.
+///                 ``D``: Digit, ``R``: Roman, ``H``: Hiragana, ``T``: Katakana, ``K``: Kanji,
+///                 ``O``: Other, ``G``: Grapheme cluster. You can specify multiple types such as
+///                 ``DGR``.
 /// :param norm: If True, input texts will be normalized beforehand.
 /// :type model: bytes
 /// :type predict_tags: bool
@@ -311,7 +310,7 @@ impl Vaporetto {
 #[pymethods]
 impl Vaporetto {
     #[new]
-    #[args(predict_tags = "false", wsconst = "\"\"", norm = "true")]
+    #[pyo3(signature = (model, /, predict_tags=false, wsconst="", norm=true))]
     fn new(
         py: Python,
         model: &[u8],
@@ -345,7 +344,7 @@ impl Vaporetto {
     /// :raises ValueError: if the model is invalid.
     /// :raises ValueError: if the wsconst value is invalid.
     #[staticmethod]
-    #[args(wsconst = "\"\"", norm = "true")]
+    #[pyo3(signature = (model, /, wsconst="", norm=true))]
     #[pyo3(text_signature = "(model, /, wsconst = \"\", norm = True)")]
     fn create_from_kytea_model(
         py: Python,
@@ -366,7 +365,7 @@ impl Vaporetto {
     /// :param text: A text to tokenize.
     /// :type text: str
     /// :rtype: vaporetto.TokenList
-    #[pyo3(text_signature = "($self, text, /)")]
+    #[pyo3(signature = (text, /))]
     fn tokenize(&mut self, py: Python, text: String) -> TokenList {
         if self
             .wrapper
@@ -419,7 +418,7 @@ impl Vaporetto {
     /// :param text: A text to tokenize.
     /// :type text: str
     /// :rtype: str
-    #[pyo3(text_signature = "($self, text, /)")]
+    #[pyo3(signature = (text, /))]
     fn tokenize_to_string(&mut self, py: Python, text: String) -> Py<PyUnicode> {
         if self
             .wrapper
@@ -442,5 +441,6 @@ fn vaporetto(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<TokenList>()?;
     m.add_class::<TokenIterator>()?;
     m.add_class::<Token>()?;
+    m.add("VAPORETTO_VERSION", vaporetto_rust::VERSION)?;
     Ok(())
 }
