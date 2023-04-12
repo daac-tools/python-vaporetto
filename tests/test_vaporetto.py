@@ -3,21 +3,26 @@ from __future__ import annotations
 import pathlib
 
 import vaporetto
+import zstandard
 
 MODEL_PATH = pathlib.PurePath(__file__).parent / 'data/model.zst'
 
 
 def test_tokenlist_empty() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read())
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read())
     tokens = tokenizer.tokenize('')
 
     assert [] == list(tokens)
 
 
 def test_tokenlist_index() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read())
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read())
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert 'まぁ' == tokens[0].surface()
@@ -29,8 +34,10 @@ def test_tokenlist_index() -> None:
 
 
 def test_tokenlist_iter() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read())
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read())
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert ['まぁ', '社長', 'は', '火星', '猫', 'だ'] == list(
@@ -39,8 +46,10 @@ def test_tokenlist_iter() -> None:
 
 
 def test_tokenlist_iter_positions() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read())
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read())
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert [(0, 2), (2, 4), (4, 5), (5, 7), (7, 8), (8, 9)] == list(
@@ -49,16 +58,20 @@ def test_tokenlist_iter_positions() -> None:
 
 
 def test_wsconst() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read(), wsconst='K')
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read(), wsconst='K')
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert ['まぁ', '社長', 'は', '火星猫', 'だ'] == list(token.surface() for token in tokens)
 
 
 def test_tags_1() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags=True)
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags=True)
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert ['名詞', '名詞', '助詞', '名詞', '名詞', '助動詞'] == list(
@@ -67,8 +80,10 @@ def test_tags_1() -> None:
 
 
 def test_tags_2() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags=True)
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags=True)
     tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
 
     assert ['マー', 'シャチョー', 'ワ', 'カセー', 'ネコ', 'ダ'] == list(
@@ -77,14 +92,18 @@ def test_tags_2() -> None:
 
 
 def test_tokenize_to_string_empty() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags=True)
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags=True)
     assert '' == tokenizer.tokenize_to_string('')
 
 
 def test_tokenize_to_string() -> None:
+    dctx = zstandard.ZstdDecompressor()
     with open(MODEL_PATH, 'rb') as fp:
-        tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags=True)
+        dict_reader = dctx.stream_reader(fp)
+        tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags=True)
     assert (
         'まぁ/名詞/マー 社長/名詞/シャチョー は/助詞/ワ 火星/名詞/カセー 猫/名詞/ネコ だ/助動詞/ダ'
         == tokenizer.tokenize_to_string('まぁ社長は火星猫だ')

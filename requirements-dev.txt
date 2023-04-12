@@ -1,6 +1,7 @@
-pytest>=7.2.1
+pytest>=7.3.0
 pytest-benchmark>=4.0.0
-mypy>=0.991
+mypy>=1.2.0
 kytea>=0.1.7
-SudachiPy>=0.6.6
+SudachiPy>=0.6.7
 SudachiDict-core>=20230110
+zstandard>=0.20.0
