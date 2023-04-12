@@ -37,6 +37,16 @@ $ pip install git+https://github.com/daac-tools/python-vaporetto
 python-vaporetto does not contain model files.
 To perform tokenization, follow [the document of Vaporetto](https://github.com/daac-tools/vaporetto) to download distribution models or train your own models beforehand.
 
+Check the version number as shown below to use compatible models:
+
+```python
+import vaporetto
+vaporetto.VAPORETTO_VERSION
+#=> "0.6.3"
+```
+
+Examples:
+
 ```python
 # Import vaporetto module
 import vaporetto

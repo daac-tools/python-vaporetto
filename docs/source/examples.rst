@@ -5,6 +5,14 @@ python-vaporetto does not contain model files. To perform tokenization, follow `
 Vaporetto <https://github.com/daac-tools/vaporetto>`_ to download distribution models or train
 your own models beforehand.
 
+You can check the version number as shown below to use compatible models:
+
+.. code-block:: python
+
+   >>> import vaporetto
+   >>> vaporetto.VAPORETTO_VERSION
+   '0.6.3'
+
 Tokenize with Vaporetto model
 -----------------------------
 
@@ -54,6 +62,6 @@ If you want to use a KyTea model, use ``create_from_kytea_model()`` instead.
 .. code-block:: python
 
     >>> with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:
-    >>>     model = fp.read()
+    ...     model = fp.read()
 
     >>> tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
