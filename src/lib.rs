@@ -1,5 +1,4 @@
 use std::fmt::Write;
-use std::io::Read;
 
 use pyo3::{exceptions::PyValueError, prelude::*, types::PyUnicode};
 
@@ -211,8 +210,8 @@ impl PredictorWrapper {
 ///
 /// Examples:
 ///     >>> import vaporetto
-///     >>> with open('path/to/model.zst', 'rb') as fp:
-///     >>>     model = fp.read()
+///     >>> with open('path/to/model', 'rb') as fp:
+///     ...     model = fp.read()
 ///     >>> tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
 ///     >>> tokenizer.tokenize_to_string('まぁ社長は火星猫だ')
 ///     'まぁ/名詞/マー 社長/名詞/シャチョー は/助詞/ワ 火星/名詞/カセー 猫/名詞/ネコ だ/助動詞/ダ'
@@ -318,14 +317,8 @@ impl Vaporetto {
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
-        let mut buf = vec![];
         let (model, _) = py.allow_threads(|| {
-            let mut decoder = ruzstd::StreamingDecoder::new(model)
-                .map_err(|e| PyValueError::new_err(e.to_string()))?;
-            decoder
-                .read_to_end(&mut buf)
-                .map_err(|e| PyValueError::new_err(e.to_string()))?;
-            Model::read_slice(&buf).map_err(|e| PyValueError::new_err(e.to_string()))
+            Model::read_slice(&model).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
         Self::create_internal(py, model, predict_tags, wsconst, norm)
     }
