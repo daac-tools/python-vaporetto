@@ -210,9 +210,8 @@ impl PredictorWrapper {
 ///
 /// Examples:
 ///     >>> import vaporetto
-///     >>> with open('path/to/model', 'rb') as fp:
-///     ...     model = fp.read()
-///     >>> tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
+///     >>> with open('path/to/vaporetto.model', 'rb') as fp:
+///     ...     tokenizer = vaporetto.Vaporetto(fp.read(), predict_tags = True)
 ///     >>> tokenizer.tokenize_to_string('まぁ社長は火星猫だ')
 ///     'まぁ/名詞/マー 社長/名詞/シャチョー は/助詞/ワ 火星/名詞/カセー 猫/名詞/ネコ だ/助動詞/ダ'
 ///     >>> tokens = tokenizer.tokenize('まぁ社長は火星猫だ')

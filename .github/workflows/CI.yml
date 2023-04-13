@@ -35,6 +35,8 @@ jobs:
         pip install vaporetto --no-index --find-links target/wheels --force-reinstall
         mypy --strict tests
         pytest tests/test_vaporetto.py
+        python -m doctest README.md
+        python -m doctest docs/source/examples.rst
 
   pack-sdist:
     needs: [ test ]

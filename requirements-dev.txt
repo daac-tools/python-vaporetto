@@ -4,4 +4,3 @@ mypy>=1.2.0
 kytea>=0.1.7
 SudachiPy>=0.6.7
 SudachiDict-core>=20230110
-zstandard>=0.20.0

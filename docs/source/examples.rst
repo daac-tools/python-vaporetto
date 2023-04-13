@@ -21,7 +21,7 @@ The following example tokenizes a string using a Vaporetto model.
 .. code-block:: python
 
    >>> import vaporetto
-   >>> with open('path/to/model', 'rb') as fp:
+   >>> with open('tests/data/vaporetto.model', 'rb') as fp:
    ...     model = fp.read()
 
    >>> tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
@@ -50,9 +50,9 @@ you must decompress them outside the API:
    >>> import zstandard  # zstandard package in PyPI
 
    >>> dctx = zstandard.ZstdDecompressor()
-   >>> with open('path/to/model.zst', 'rb') as fp:
-   ...     dict_reader = dctx.stream_reader(fp)
-   >>> tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
+   >>> with open('tests/data/vaporetto.model.zst', 'rb') as fp:
+   ...     with dctx.stream_reader(fp) as dict_reader:
+   ...         tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
 
 Tokenize with KyTea model
 -------------------------
@@ -61,7 +61,6 @@ If you want to use a KyTea model, use ``create_from_kytea_model()`` instead.
 
 .. code-block:: python
 
-    >>> with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:
-    ...     model = fp.read()
-
-    >>> tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
+    >>> import vaporetto
+    >>> with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:  # doctest: +SKIP
+    ...     tokenizer = vaporetto.Vaporetto.create_from_kytea_model(fp.read())

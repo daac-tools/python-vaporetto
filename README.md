@@ -40,39 +40,46 @@ To perform tokenization, follow [the document of Vaporetto](https://github.com/d
 Check the version number as shown below to use compatible models:
 
 ```python
-import vaporetto
-vaporetto.VAPORETTO_VERSION
-#=> "0.6.3"
+>>> import vaporetto
+>>> vaporetto.VAPORETTO_VERSION
+'0.6.3'
+
 ```
 
 Examples:
 
 ```python
 # Import vaporetto module
-import vaporetto
+>>> import vaporetto
 
 # Load the model file
-with open('path/to/model', 'rb') as fp:
-    model = fp.read()
+>>> with open('tests/data/vaporetto.model', 'rb') as fp:
+...     model = fp.read()
 
 # Create an instance of the Vaporetto
-tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
+>>> tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
 
 # Tokenize
-tokenizer.tokenize_to_string('まぁ社長は火星猫だ')
-#=> 'まぁ/名詞/マー 社長/名詞/シャチョー は/助詞/ワ 火星/名詞/カセー 猫/名詞/ネコ だ/助動詞/ダ'
+>>> tokenizer.tokenize_to_string('まぁ社長は火星猫だ')
+'まぁ/名詞/マー 社長/名詞/シャチョー は/助詞/ワ 火星/名詞/カセー 猫/名詞/ネコ だ/助動詞/ダ'
 
-tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
-len(tokens)
-#=> 6
-tokens[0].surface()
-#=> 'まぁ'
-tokens[0].tag(0)
-#=> '名詞'
-tokens[0].tag(1)
-#=> 'マー'
-[token.surface() for token in tokens]
-#=> ['まぁ', '社長', 'は', '火星', '猫', 'だ']
+>>> tokens = tokenizer.tokenize('まぁ社長は火星猫だ')
+
+>>> len(tokens)
+6
+
+>>> tokens[0].surface()
+'まぁ'
+
+>>> tokens[0].tag(0)
+'名詞'
+
+>>> tokens[0].tag(1)
+'マー'
+
+>>> [token.surface() for token in tokens]
+['まぁ', '社長', 'は', '火星', '猫', 'だ']
+
 ```
 
 ## Note for distributed models
@@ -81,13 +88,14 @@ The distributed models are compressed in zstd format. If you want to load these 
 you must decompress them outside the API.
 
 ```python
-import vaporetto
-import zstandard  # zstandard package in PyPI
+>>> import vaporetto
+>>> import zstandard  # zstandard package in PyPI
 
-dctx = zstandard.ZstdDecompressor()
-with open('path/to/model.zst', 'rb') as fp:
-    dict_reader = dctx.stream_reader(fp)
-    tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
+>>> dctx = zstandard.ZstdDecompressor()
+>>> with open('tests/data/vaporetto.model.zst', 'rb') as fp:
+...    with dctx.stream_reader(fp) as dict_reader:
+...        tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
+
 ```
 
 ## Note for KyTea's models
@@ -95,10 +103,9 @@ with open('path/to/model.zst', 'rb') as fp:
 You can also use KyTea's models as follows:
 
 ```python
-with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:
-    model = fp.read()
+>>> with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:  # doctest: +SKIP
+...     tokenizer = vaporetto.Vaporetto.create_from_kytea_model(fp.read())
 
-tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)
 ```
 
 Note: Vaporetto does not support tag prediction with KyTea's models.
