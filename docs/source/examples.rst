@@ -5,6 +5,14 @@ python-vaporetto does not contain model files. To perform tokenization, follow `
 Vaporetto <https://github.com/daac-tools/vaporetto>`_ to download distribution models or train
 your own models beforehand.
 
+You can check the version number as shown below to use compatible models:
+
+.. code-block:: python
+
+   >>> import vaporetto
+   >>> vaporetto.VAPORETTO_VERSION
+   '0.6.3'
+
 Tokenize with Vaporetto model
 -----------------------------
 
@@ -13,8 +21,8 @@ The following example tokenizes a string using a Vaporetto model.
 .. code-block:: python
 
    >>> import vaporetto
-   >>> with open('path/to/model.zst', 'rb') as fp:
-   >>>     model = fp.read()
+   >>> with open('path/to/model', 'rb') as fp:
+   ...     model = fp.read()
 
    >>> tokenizer = vaporetto.Vaporetto(model, predict_tags = True)
 
@@ -33,6 +41,18 @@ The following example tokenizes a string using a Vaporetto model.
    >>> [token.surface() for token in tokens]
    ['まぁ', '社長', 'は', '火星', '猫', 'だ']
 
+The distributed models are compressed in zstd format. If you want to load these compressed models,
+you must decompress them outside the API:
+
+.. code-block:: python
+
+   >>> import vaporetto
+   >>> import zstandard  # zstandard package in PyPI
+
+   >>> dctx = zstandard.ZstdDecompressor()
+   >>> with open('path/to/model.zst', 'rb') as fp:
+   ...     dict_reader = dctx.stream_reader(fp)
+   >>> tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
 
 Tokenize with KyTea model
 -------------------------
@@ -42,6 +62,6 @@ If you want to use a KyTea model, use ``create_from_kytea_model()`` instead.
 .. code-block:: python
 
     >>> with open('path/to/jp-0.4.7-5.mod', 'rb') as fp:
-    >>>     model = fp.read()
+    ...     model = fp.read()
 
     >>> tokenizer = vaporetto.Vaporetto.create_from_kytea_model(model)

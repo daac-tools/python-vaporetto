@@ -37,12 +37,22 @@ $ pip install git+https://github.com/daac-tools/python-vaporetto
 python-vaporetto does not contain model files.
 To perform tokenization, follow [the document of Vaporetto](https://github.com/daac-tools/vaporetto) to download distribution models or train your own models beforehand.
 
+Check the version number as shown below to use compatible models:
+
+```python
+import vaporetto
+vaporetto.VAPORETTO_VERSION
+#=> "0.6.3"
+```
+
+Examples:
+
 ```python
 # Import vaporetto module
 import vaporetto
 
 # Load the model file
-with open('path/to/model.zst', 'rb') as fp:
+with open('path/to/model', 'rb') as fp:
     model = fp.read()
 
 # Create an instance of the Vaporetto
@@ -64,6 +74,23 @@ tokens[0].tag(1)
 [token.surface() for token in tokens]
 #=> ['まぁ', '社長', 'は', '火星', '猫', 'だ']
 ```
+
+## Note for distributed models
+
+The distributed models are compressed in zstd format. If you want to load these compressed models,
+you must decompress them outside the API.
+
+```python
+import vaporetto
+import zstandard  # zstandard package in PyPI
+
+dctx = zstandard.ZstdDecompressor()
+with open('path/to/model.zst', 'rb') as fp:
+    dict_reader = dctx.stream_reader(fp)
+    tokenizer = vaporetto.Vaporetto(dict_reader.read(), predict_tags = True)
+```
+
+## Note for KyTea's models
 
 You can also use KyTea's models as follows:
 
