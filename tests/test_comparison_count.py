@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import vaporetto
-import Mykytea
-from sudachipy import tokenizer as sudachi_tokenizer
+import Mykytea  # type: ignore[import-not-found]
+from sudachipy import tokenizer as sudachi_tokenizer  # type: ignore[import-not-found]
 from sudachipy import dictionary as sudachi_dictionary
 
-from pytest_benchmark import fixture
+from pytest_benchmark import fixture  # type: ignore[import-not-found]
 from tests import dataset
 
 
