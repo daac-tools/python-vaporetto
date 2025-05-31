@@ -42,7 +42,7 @@ Check the version number as shown below to use compatible models:
 ```python
 >>> import vaporetto
 >>> vaporetto.VAPORETTO_VERSION
-'0.6.3'
+'0.6.5'
 
 ```
 
