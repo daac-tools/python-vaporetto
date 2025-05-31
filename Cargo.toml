@@ -16,6 +16,6 @@ crate-type = ["cdylib"]
 [dependencies]
 hashbrown = "0.15.3"  # MIT or Apache-2.0
 ouroboros = "0.18.5"  # MIT or Apache-2.0
-pyo3 = { version = "0.24.0", features = ["extension-module"] }  # Apache-2.0
+pyo3 = { version = "0.25.0", features = ["extension-module"] }  # Apache-2.0
 vaporetto_rust = { package = "vaporetto", version = "0.6.5", features = ["kytea"] }  # MIT or Apache-2.0
 vaporetto_rules = "0.6.5"  # MIT or Apache-2.0
