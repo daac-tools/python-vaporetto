@@ -103,6 +103,10 @@ struct TokenIterator {
 
 #[pymethods]
 impl TokenIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
     fn __next__(&mut self, py: Python) -> Option<Token> {
         if self.index < self.len {
             let index = self.index;
