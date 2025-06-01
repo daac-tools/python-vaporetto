@@ -11,7 +11,7 @@ You can check the version number as shown below to use compatible models:
 
    >>> import vaporetto
    >>> vaporetto.VAPORETTO_VERSION
-   '0.6.3'
+   '0.6.5'
 
 Tokenize with Vaporetto model
 -----------------------------

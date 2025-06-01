@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use pyo3::{exceptions::PyValueError, prelude::*, types::PyUnicode};
+use pyo3::{exceptions::PyValueError, prelude::*, types::PyString};
 
 use hashbrown::HashMap;
 use ouroboros::self_referencing;
@@ -24,7 +24,7 @@ impl Token {
     /// Return the surface of this token.
     ///
     /// :rtype: str
-    fn surface(&self, py: Python) -> Py<PyUnicode> {
+    fn surface(&self, py: Python) -> Py<PyString> {
         self.list.borrow(py).surfaces[self.index].0.clone_ref(py)
     }
 
@@ -49,7 +49,7 @@ impl Token {
     /// :rtype: Optional[str]
     /// :raises ValueError: if the index is out of range.
     #[pyo3(signature = (index, /))]
-    fn tag(&self, py: Python, index: usize) -> PyResult<Option<Py<PyUnicode>>> {
+    fn tag(&self, py: Python, index: usize) -> PyResult<Option<Py<PyString>>> {
         let list = self.list.borrow(py);
         if index < list.n_tags {
             let pos = list.surfaces[self.index].2 - 1;
@@ -68,13 +68,13 @@ impl Token {
         self.list.borrow(py).n_tags
     }
 
-    fn __str__(&self, py: Python) -> Py<PyUnicode> {
+    fn __str__(&self, py: Python) -> Py<PyString> {
         self.surface(py)
     }
 
     fn __repr__(&self, py: Python) -> PyResult<String> {
         let list = self.list.borrow(py);
-        let surface = list.surfaces[self.index].0.as_ref(py).to_str()?;
+        let surface: &str = list.surfaces[self.index].0.extract(py)?;
         let mut result = format!("Token {{ surface: {:?}, tags: [", surface);
         let pos = list.surfaces[self.index].2 - 1;
         for i in 0..list.n_tags {
@@ -82,7 +82,7 @@ impl Token {
                 result += ", ";
             }
             if let Some(tag) = list.tags[pos * list.n_tags + i].as_ref() {
-                let tag = tag.as_ref(py).to_str()?;
+                let tag: &str = tag.extract(py)?;
                 write!(&mut result, "{:?}", tag).unwrap();
             } else {
                 result += "None";
@@ -103,6 +103,10 @@ struct TokenIterator {
 
 #[pymethods]
 impl TokenIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
     fn __next__(&mut self, py: Python) -> Option<Token> {
         if self.index < self.len {
             let index = self.index;
@@ -120,8 +124,8 @@ impl TokenIterator {
 /// List of :class:`.Token` returned by the tokenizer.
 #[pyclass]
 struct TokenList {
-    surfaces: Vec<(Py<PyUnicode>, usize, usize)>,
-    tags: Vec<Option<Py<PyUnicode>>>,
+    surfaces: Vec<(Py<PyString>, usize, usize)>,
+    tags: Vec<Option<Py<PyString>>>,
     n_tags: usize,
 }
 
@@ -154,10 +158,10 @@ struct PredictorWrapper {
     predictor: Predictor,
     #[borrows(predictor)]
     #[covariant]
-    sentence_buf: Sentence<'static, 'this>,
+    norm_sentence_buf: Sentence<'static, 'this>,
     #[borrows(predictor)]
     #[covariant]
-    norm_sentence_buf: Sentence<'static, 'this>,
+    sentence_buf: Sentence<'static, 'this>,
 }
 
 impl PredictorWrapper {
@@ -241,14 +245,13 @@ impl PredictorWrapper {
 /// :raises ValueError: if the model is invalid.
 /// :raises ValueError: if the wsconst value is invalid.
 #[pyclass]
-#[pyo3(text_signature = "(model, /, predict_tags = False, wsconst = \"\", norm = True)")]
 struct Vaporetto {
     wrapper: PredictorWrapper,
     predict_tags: bool,
     normalize: bool,
     post_filters: Vec<Box<dyn SentenceFilter>>,
-    word_cache: HashMap<String, Py<PyUnicode>>,
-    tag_cache: HashMap<String, Py<PyUnicode>>,
+    word_cache: HashMap<String, Py<PyString>>,
+    tag_cache: HashMap<String, Py<PyString>>,
     string_buf: String,
 }
 
@@ -265,7 +268,7 @@ impl Vaporetto {
         let mut word_cache = HashMap::new();
         for record in model.dictionary() {
             let word = record.get_word();
-            word_cache.insert(word.to_string(), PyUnicode::new(py, word).into());
+            word_cache.insert(word.to_string(), PyString::new(py, word).into());
         }
 
         let predictor = py.allow_threads(|| {
@@ -378,7 +381,7 @@ impl Vaporetto {
                     .word_cache
                     .get(token.surface())
                     .map(|surf| surf.clone_ref(py))
-                    .unwrap_or_else(|| PyUnicode::new(py, token.surface()).into());
+                    .unwrap_or_else(|| PyString::new(py, token.surface()).into());
                 (surface, token.start(), token.end())
             })
             .collect();
@@ -391,7 +394,7 @@ impl Vaporetto {
                         .raw_entry_mut()
                         .from_key(tag.as_ref())
                         .or_insert_with(|| {
-                            (tag.to_string(), PyUnicode::new(py, tag.as_ref()).into())
+                            (tag.to_string(), PyString::new(py, tag.as_ref()).into())
                         })
                         .1
                         .clone_ref(py)
@@ -411,7 +414,7 @@ impl Vaporetto {
     /// :type text: str
     /// :rtype: str
     #[pyo3(signature = (text, /))]
-    fn tokenize_to_string(&mut self, py: Python, text: String) -> Py<PyUnicode> {
+    fn tokenize_to_string(&mut self, py: Python, text: String) -> Py<PyString> {
         if self
             .wrapper
             .predict(text, self.predict_tags, self.normalize, &self.post_filters)
@@ -423,12 +426,12 @@ impl Vaporetto {
         } else {
             self.string_buf.clear();
         }
-        PyUnicode::new(py, &self.string_buf).into()
+        PyString::new(py, &self.string_buf).into()
     }
 }
 
 #[pymodule]
-fn vaporetto(_py: Python, m: &PyModule) -> PyResult<()> {
+fn vaporetto(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Vaporetto>()?;
     m.add_class::<TokenList>()?;
     m.add_class::<TokenIterator>()?;
