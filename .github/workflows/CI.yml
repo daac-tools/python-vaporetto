@@ -130,7 +130,7 @@ jobs:
       with:
         target: ${{ matrix.target }}
         manylinux: auto
-        args: -i ${{ matrix.python-version }} --release --universal2
+        args: -i ${{ matrix.python-version }} --release --target universal2-apple-darwin
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
