@@ -14,6 +14,18 @@ permissions:
   contents: read
 
 jobs:
+  check-release-version:
+    if: "startsWith(github.ref, 'refs/tags/')"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Verify tag matches package versions
+      run: |
+        TAG="${GITHUB_REF_NAME#v}"
+        CARGO_VERSION="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)"
+        PYPROJECT_VERSION="$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml | head -n1)"
+        test "$TAG" = "$CARGO_VERSION"
+        test "$TAG" = "$PYPROJECT_VERSION"
   test:
     strategy:
       matrix:
@@ -43,7 +55,7 @@ jobs:
 
   pack-sdist:
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ test ]
+    needs: [ check-release-version, test ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -62,7 +74,7 @@ jobs:
 
   pack-linux:
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ test ]
+    needs: [ check-release-version, test ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -87,7 +99,7 @@ jobs:
 
   pack-windows:
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ test ]
+    needs: [ check-release-version, test ]
     runs-on: windows-latest
     strategy:
       matrix:
@@ -112,7 +124,7 @@ jobs:
 
   pack-macos:
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ test ]
+    needs: [ check-release-version, test ]
     runs-on: macos-latest
     strategy:
       matrix:
@@ -136,7 +148,7 @@ jobs:
   release:
     name: Release
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [ pack-sdist, pack-linux, pack-windows, pack-macos ]
+    needs: [ check-release-version, pack-sdist, pack-linux, pack-windows, pack-macos ]
     permissions:
       contents: read
       id-token: write
