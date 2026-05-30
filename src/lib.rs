@@ -271,7 +271,7 @@ impl Vaporetto {
             word_cache.insert(word.to_string(), PyString::new(py, word).into());
         }
 
-        let predictor = py.allow_threads(|| {
+        let predictor = py.detach(|| {
             Predictor::new(model, predict_tags).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
 
@@ -319,7 +319,7 @@ impl Vaporetto {
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
-        let (model, _) = py.allow_threads(|| {
+        let (model, _) = py.detach(|| {
             Model::read_slice(&model).map_err(|e| PyValueError::new_err(e.to_string()))
         })?;
         Self::create_internal(py, model, predict_tags, wsconst, norm)
@@ -347,7 +347,7 @@ impl Vaporetto {
         wsconst: &str,
         norm: bool,
     ) -> PyResult<Self> {
-        let model = py.allow_threads(|| {
+        let model = py.detach(|| {
             let kytea_model =
                 KyteaModel::read(model).map_err(|e| PyValueError::new_err(e.to_string()))?;
             Model::try_from(kytea_model).map_err(|e| PyValueError::new_err(e.to_string()))
