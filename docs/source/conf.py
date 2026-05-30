@@ -1,5 +1,5 @@
 project = 'python-vaporetto'
-copyright = '2022, daac-tools'
+copyright = '2026, daac-tools'
 author = 'Koichi Akabe'
 
 extensions = [
