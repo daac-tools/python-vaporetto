@@ -4,3 +4,18 @@ build-backend = "maturin"
 
 [project]
 name = "vaporetto"
+version = "0.3.3"
+description = "Python wrapper of Vaporetto tokenizer"
+readme = "README.md"
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Rust",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Text Processing",
+]
+
+[project.optional-dependencies]
+docs = [
+  "sphinx-rtd-theme",
+]
